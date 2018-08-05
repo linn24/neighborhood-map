@@ -8,20 +8,19 @@
 <body>
     <div class="container">
         <div class="options-box">
-            <h1>Find MRT Stations in Singapore</h1>
+            <h1>Find Libraries in Singapore</h1>
             <div>
-                <input id="txtFilter" type="text" placeholder="Station Name">
+                <input id="txtFilter" type="text" placeholder="Location Name">
                 <input id="btnFilter" type="button" value="Filter">
             </div>
             <hr>
             <div>
-                <ul data-bind="foreach: stationList">
+                <ul data-bind="foreach: locationList">
                     <li data-bind="text: title, click: showInfo($parent)"></li>
                 </ul>
 
-                <div data-bind="with: currentStation">
+                <div data-bind="with: currentLocation">
                     <h2 data-bind="text: title"></h2>
-                    <div data-bind="text: address"></div>
                 </div>
             </div>
             <hr>
@@ -30,12 +29,11 @@
     </div>
 
     <script src="js/lib/knockout-3.2.0.js"></script>
-    <script src="js/app.js"></script>
+
     <script>
     var map;
 
-    // Create a new blank array for all the listing markers.
-    var markers = [];
+    //var locations = [];
 
     // This global polygon variable is to ensure only ONE polygon is rendered.
     var polygon = null;
@@ -123,40 +121,6 @@
             mapTypeControl: false
         });
 
-        // These are the real estate listings that will be shown to the user.
-        // Normally we'd have these in a database instead.
-/*
-        var locations = [
-            {
-                title: 'Woodlands',
-                location: {lat: 1.4369416, lng: 103.7863953},
-                address: 'Q30, Woodlands Ave 2, Singapore'
-            },
-            {
-                title: 'Bartley',
-                location: {lat: 1.3422592, lng: 103.8802886},
-                address: '212 Upper Paya Lebar Road, 534881, Upper Paya Lebar Road'
-            },
-            {
-                title: 'Esplanade',
-                location: {lat: 1.2939413, lng: 103.8553744},
-                address: '90 Bras Basah Road'
-            },
-            {
-                title: 'Nicoll Highway MRT Station',
-                location: {lat: 1.3002399, lng: 103.8635784},
-                address: '20 Republic Ave'
-            },
-            {
-                title: 'Kent Ridge MRT Station',
-                location: {lat: 1.2924896, lng: 103.7848814},
-                address: '301 South Buona Vista Road'
-            }
-
-        ];
-
-*/
-
         var request = {
             location: bishanAMK,
             radius: '5000',
@@ -168,11 +132,12 @@
 
         function callback(results, status) {
             if (status == google.maps.places.PlacesServiceStatus.OK) {
-                console.log(results);
                 for (var i = 0; i < results.length; i++) {
                     var place = results[i];
+                    myModel.locationList.push(new Location(place.name));
                     createMarker(results[i], i);
                 }
+                console.log("inside callback: " + myModel.locationList().length);
             }
         }
 
@@ -194,7 +159,6 @@
                 icon: defaultIcon,
                 id: index
             });
-            console.log(place.name);
 
             // Push the marker to our array of markers.
             //markers.push(marker);
@@ -213,6 +177,7 @@
 
             marker.setMap(map);
         }
+        //ko.applyBindings(myModel);
     }
 
     function populateInfoWindow(marker, infowindow, place) {
@@ -242,7 +207,39 @@
         return markerImage;
     }
 
+
+/* knockout portion
+    var Location = function(data) {
+        this.title = ko.observable(data.title);
+        //this.location = ko.observable(data.location);
+        //this.address = ko.observable(data.address);
+        this.showInfo = function(parent) {
+            parent.currentLocation(this);
+        };
+
+    }
+
+
+    var ViewModel = function() {
+        var self = this;
+
+        this.locationList = ko.observableArray([]);
+
+        console.log('inside viewmodel');
+        console.log(locations.length);
+
+        locations.forEach(function(locationItem) {
+            self.locationList.push(new Location(locationItem));
+        });
+
+        this.currentLocation = ko.observable(this.locationList()[0]);
+    }
+
+    ko.applyBindings(new ViewModel());
+ */
     </script>
+
+    <script src="js/app.js"></script>
 
     <script async defer
         src=

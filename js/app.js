@@ -1,4 +1,5 @@
-var stations = [
+/*
+var locations = [
     {
         title: 'Woodlands',
         location: {lat: 1.4369416, lng: 103.7863953},
@@ -26,11 +27,11 @@ var stations = [
     }
 
 ];
-
-var MRT_Station = function(data) {
-    this.title = ko.observable(data.title);
-    this.location = ko.observable(data.location);
-    this.address = ko.observable(data.address);
+*/
+var Location = function(data) {
+    this.title = ko.observable(data);
+    //this.location = ko.observable(data.location);
+    //this.address = ko.observable(data.address);
 
 /*
     this.title = ko.computed(function() {
@@ -55,7 +56,7 @@ var MRT_Station = function(data) {
     }, this);
 */
     this.showInfo = function(parent) {
-        parent.currentStation(this);
+        parent.currentLocation(this);
     };
 
 }
@@ -64,13 +65,13 @@ var MRT_Station = function(data) {
 var ViewModel = function() {
     var self = this;
 
-    this.stationList = ko.observableArray([]);
+    this.locationList = ko.observableArray([]);
+    console.log("inside ViewModel: " + this.locationList().length);
+    // locations.forEach(function(locationItem) {
+    //     self.locationList.push(new Location(locationItem));
+    // });
 
-    stations.forEach(function(stationItem) {
-        self.stationList.push(new MRT_Station(stationItem));
-    });
-
-    this.currentStation = ko.observable(this.stationList()[0]);
+    this.currentLocation = ko.observable(this.locationList()[0]);
 
 /*
     this.incrementCounter = function() {
@@ -81,5 +82,6 @@ var ViewModel = function() {
 */
 
 }
+var myModel = new ViewModel();
 
-ko.applyBindings(new ViewModel());
+ko.applyBindings(myModel);
