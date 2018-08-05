@@ -113,9 +113,11 @@
             }
         ];
 
+        var bishanAMK = new google.maps.LatLng(1.3380368, 103.8128534);
+
         // Constructor creates a new map - only center and zoom are required.
         map = new google.maps.Map(document.getElementById('map'), {
-            center: {lat: 1.363983, lng: 103.8517913},
+            center: bishanAMK,
             zoom: 13,
             styles: styles,
             mapTypeControl: false
@@ -123,6 +125,7 @@
 
         // These are the real estate listings that will be shown to the user.
         // Normally we'd have these in a database instead.
+/*
         var locations = [
             {
                 title: 'Woodlands',
@@ -152,6 +155,27 @@
 
         ];
 
+*/
+
+        var request = {
+            location: bishanAMK,
+            radius: '5000',
+            type: ['library']
+        };
+
+        placeService = new google.maps.places.PlacesService(map);
+        placeService.nearbySearch(request, callback);
+
+        function callback(results, status) {
+            if (status == google.maps.places.PlacesServiceStatus.OK) {
+                console.log(results);
+                for (var i = 0; i < results.length; i++) {
+                    var place = results[i];
+                    createMarker(results[i], i);
+                }
+            }
+        }
+
         var largeInfowindow = new google.maps.InfoWindow();
 
         // Style the markers a bit. This will be our listing marker icon.
@@ -161,26 +185,22 @@
         // mouses over the marker.
         var highlightedIcon = makeMarkerIcon('FFFF24');
 
-        // The following group uses the location array to create an array of markers on initialize.
-        for (var i = 0; i < locations.length; i++) {
-            // Get the position from the location array.
-            var position = locations[i].location;
-            var title = locations[i].title;
-            var address = locations[i].address;
-
-            // Create a marker per location, and put into markers array.
+        function createMarker(place, index) {
+            var placeLoc = place.geometry.location;
             var marker = new google.maps.Marker({
-                position: position,
-                title: title,
+                position: placeLoc,
+                title: place.name,
                 animation: google.maps.Animation.DROP,
                 icon: defaultIcon,
-                id: i
+                id: index
             });
+            console.log(place.name);
+
             // Push the marker to our array of markers.
-            markers.push(marker);
+            //markers.push(marker);
             // Create an onclick event to open the large infowindow at each marker.
             marker.addListener('click', function() {
-                populateInfoWindow(this, largeInfowindow, address);
+                populateInfoWindow(this, largeInfowindow, place);
             });
             // Two event listeners - one for mouseover, one for mouseout,
             // to change the colors back and forth.
@@ -190,22 +210,16 @@
             marker.addListener('mouseout', function() {
                 this.setIcon(defaultIcon);
             });
-        }
 
-        var bounds = new google.maps.LatLngBounds();
-        // Extend the boundaries of the map for each marker and display the marker
-        for (var i = 0; i < markers.length; i++) {
-            markers[i].setMap(map);
-            bounds.extend(markers[i].position);
+            marker.setMap(map);
         }
-        map.fitBounds(bounds);
     }
 
-    function populateInfoWindow(marker, infowindow, address) {
+    function populateInfoWindow(marker, infowindow, place) {
         // Check to make sure the infowindow is not already opened on this marker.
         if (infowindow.marker != marker) {
             // Clear the infowindow content to give the streetview time to load.
-            infowindow.setContent(marker.title + "<br>" + address);
+            infowindow.setContent(marker.title + "<br>" + place.vicinity);
             infowindow.marker = marker;
             // Make sure the marker property is cleared if the infowindow is closed.
             infowindow.addListener('closeclick', function() {

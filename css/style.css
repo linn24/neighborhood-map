@@ -22,11 +22,6 @@ h1 {
     text-align: center;
 }
 
-#hide-listings,
-#show-listings {
-    width: 48%;
-}
-
 hr {
     background: #D0D7D9;
     height: 1px;
@@ -44,6 +39,7 @@ hr {
 
 .options-box {
     background: #fff;
+    color: #13609B;
     border: 1px solid #999;
     border-radius: 3px;
     height: 100%;
@@ -53,30 +49,25 @@ hr {
     width: 340px;
 }
 
-#pano {
-    width: 200px;
-    height: 200px;
-}
-
-#places-search,
-#search-within-time-text {
-    width: 84%;
+li:hover {
+    color: white;
+    background: #49A1E5;
 }
 
 .text {
     font-size: 12px;
 }
 
-#toggle-drawing {
-    width: 27%;
-    position: relative;
-    margin-left: 10px;
-}
-
-#zoom-to-area-text {
+#txtFilter {
     width: 70%;
 }
 
-#zoom-to-area {
+#btnFilter {
     width: 24%;
+}
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
 }
