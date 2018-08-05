@@ -1,43 +1,38 @@
-var initialCats = [
+var stations = [
     {
-        clickCount : 0,
-        name : 'Tabby',
-        imgSrc : 'img/434164568_fea0ad4013_z.jpg',
-        imgAttribution : 'https://www.flickr.com/photos/bigtallguy/434164568'
+        title: 'Woodlands',
+        location: {lat: 1.4369416, lng: 103.7863953},
+        address: 'Q30, Woodlands Ave 2, Singapore'
     },
     {
-        clickCount : 0,
-        name : 'Tiger',
-        imgSrc : 'img/4154543904_6e2428c421_z.jpg',
-        imgAttribution : 'https://www.flickr.com/photos/xshamx/4154543904'
+        title: 'Bartley',
+        location: {lat: 1.3422592, lng: 103.8802886},
+        address: '212 Upper Paya Lebar Road, 534881, Upper Paya Lebar Road'
     },
     {
-        clickCount : 0,
-        name : 'Scaredy',
-        imgSrc : 'img/22252709_010df3379e_z.jpg',
-        imgAttribution : 'https://www.flickr.com/photos/kpjas/22252709'
+        title: 'Esplanade',
+        location: {lat: 1.2939413, lng: 103.8553744},
+        address: '90 Bras Basah Road'
     },
     {
-        clickCount : 0,
-        name : 'Shadow',
-        imgSrc : 'img/1413379559_412a540d29_z.jpg',
-        imgAttribution : 'https://www.flickr.com/photos/malfet/1413379559'
+        title: 'Nicoll Highway MRT Station',
+        location: {lat: 1.3002399, lng: 103.8635784},
+        address: '20 Republic Ave'
     },
     {
-        clickCount : 0,
-        name : 'Sleepy',
-        imgSrc : 'img/9648464288_2516b35537_z.jpg',
-        imgAttribution : 'https://www.flickr.com/photos/onesharp/9648464288'
+        title: 'Kent Ridge MRT Station',
+        location: {lat: 1.2924896, lng: 103.7848814},
+        address: '301 South Buona Vista Road'
     }
+
 ];
 
-var Cat = function(data) {
-    this.clickCount = ko.observable(data.clickCount);
-    this.name = ko.observable(data.name);
-    this.imgSrc = ko.observable(data.imgSrc);
-    this.imgAttribution = ko.observable(data.imgAttribution);
-    this.nicknames = ko.observableArray(data.nicknames);
+var MRT_Station = function(data) {
+    this.title = ko.observable(data.title);
+    this.location = ko.observable(data.location);
+    this.address = ko.observable(data.address);
 
+/*
     this.title = ko.computed(function() {
         var title;
         var clicks = this.clickCount();
@@ -58,9 +53,9 @@ var Cat = function(data) {
         }
         return title;
     }, this);
-
-    this.showCat = function(parent) {
-        parent.currentCat(this);
+*/
+    this.showInfo = function(parent) {
+        parent.currentStation(this);
     };
 
 }
@@ -69,19 +64,21 @@ var Cat = function(data) {
 var ViewModel = function() {
     var self = this;
 
-    this.catList = ko.observableArray([]);
+    this.stationList = ko.observableArray([]);
 
-    initialCats.forEach(function(catItem) {
-        self.catList.push(new Cat(catItem));
+    stations.forEach(function(stationItem) {
+        self.stationList.push(new MRT_Station(stationItem));
     });
 
-    this.currentCat = ko.observable(this.catList()[0]);
+    this.currentStation = ko.observable(this.stationList()[0]);
 
+/*
     this.incrementCounter = function() {
         //this.currentCat().clickCount(this.currentCat().clickCount() + 1);
         //this.clickCount(this.clickCount() + 1);
         self.currentCat().clickCount(self.currentCat().clickCount() + 1);
     };
+*/
 
 }
 

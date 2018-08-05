@@ -6,75 +6,230 @@
     <link rel="stylesheet" href="css/style.css" type="text/css">
 </head>
 <body>
-    <ul data-bind="foreach: catList">
-        <li data-bind="text: name, click: showCat($parent)"></li>
-    </ul>
-
-    <div data-bind="with: currentCat">
-
-        <h2 data-bind="text: name"></h2>
-        <h3 data-bind="text: title"></h3>
-        <div data-bind="text: clickCount"></div>
-
-        <img src="" alt="cute cat" data-bind="click: $parent.incrementCounter,
-        attr: {src: imgSrc}">
-
-        <h3>Nicknames:</h3>
-
-        <ul data-bind="foreach: nicknames">
-            <li data-bind="text: $data"></li>
-        </ul>
-    </div>
-
-
-
     <div class="container">
         <div class="options-box">
-            <h1>Find Your New NYC Home</h1>
+            <h1>Find MRT Stations in Singapore</h1>
             <div>
-                <input id="show-listings" type="button" value="Show Listings">
-                <input id="hide-listings" type="button" value="Hide Listings">
-                <hr>
-                <span class="text"> Draw a shape to search within it for homes!</span>
-                <input id="toggle-drawing"  type="button" value="Drawing Tools">
+                <input id="txtFilter" type="text" placeholder="Station Name">
+                <input id="btnFilter" type="button" value="Filter">
             </div>
             <hr>
             <div>
-                <input id="zoom-to-area-text" type="text" placeholder="Enter your favorite area!">
-                <input id="zoom-to-area" type="button" value="Zoom">
+                <ul data-bind="foreach: stationList">
+                    <li data-bind="text: title, click: showInfo($parent)"></li>
+                </ul>
+
+                <div data-bind="with: currentStation">
+                    <h2 data-bind="text: title"></h2>
+                    <div data-bind="text: address"></div>
+                </div>
             </div>
             <hr>
-            <div>
-                <span class="text"> Within </span>
-                <select id="max-duration">
-                    <option value="10">10 min</option>
-                    <option value="15">15 min</option>
-                    <option value="30">30 min</option>
-                    <option value="60">1 hour</option>
-                </select>
-                <select id="mode">
-                    <option value="DRIVING">drive</option>
-                    <option value="WALKING">walk</option>
-                    <option value="BICYCLING">bike</option>
-                    <option value="TRANSIT">transit ride</option>
-                </select>
-                <span class="text">of</span>
-                <input id="search-within-time-text" type="text" placeholder="Ex: Google Office NYC or 75 9th Ave, New York, NY">
-                <input id="search-within-time" type="button" value="Go">
-            </div>
-            <hr>
-            <div>
-                <span class="text">Search for nearby places</span>
-                <input id="places-search" type="text" placeholder="Ex: Pizza delivery in NYC">
-                <input id="go-places" type="button" value="Go">
-            </div>
         </div>
         <div id="map"></div>
     </div>
 
     <script src="js/lib/knockout-3.2.0.js"></script>
     <script src="js/app.js"></script>
-    
+    <script>
+    var map;
+
+    // Create a new blank array for all the listing markers.
+    var markers = [];
+
+    // This global polygon variable is to ensure only ONE polygon is rendered.
+    var polygon = null;
+
+    // Create placemarkers array to use in multiple functions to have control
+    // over the number of places that show.
+    var placeMarkers = [];
+
+    function initMap() {
+        // Create a styles array to use with the map.
+        var styles = [
+            {
+                featureType: 'water',
+                stylers: [
+                    { color: '#19a0d8' }
+                ]
+            },{
+                featureType: 'administrative',
+                elementType: 'labels.text.stroke',
+                stylers: [
+                    { color: '#ffffff' },
+                    { weight: 6 }
+                ]
+            },{
+                featureType: 'administrative',
+                elementType: 'labels.text.fill',
+                stylers: [
+                    { color: '#e85113' }
+                ]
+            },{
+                featureType: 'road.highway',
+                elementType: 'geometry.stroke',
+                stylers: [
+                    { color: '#efe9e4' },
+                    { lightness: -40 }
+                ]
+            },{
+                featureType: 'transit.station',
+                stylers: [
+                    { weight: 9 },
+                    { hue: '#e85113' }
+                ]
+            },{
+                featureType: 'road.highway',
+                elementType: 'labels.icon',
+                stylers: [
+                    { visibility: 'off' }
+                ]
+            },{
+                featureType: 'water',
+                elementType: 'labels.text.stroke',
+                stylers: [
+                    { lightness: 100 }
+                ]
+            },{
+                featureType: 'water',
+                elementType: 'labels.text.fill',
+                stylers: [
+                    { lightness: -100 }
+                ]
+            },{
+                featureType: 'poi',
+                elementType: 'geometry',
+                stylers: [
+                    { visibility: 'on' },
+                    { color: '#f0e4d3' }
+                ]
+            },{
+                featureType: 'road.highway',
+                elementType: 'geometry.fill',
+                stylers: [
+                    { color: '#efe9e4' },
+                    { lightness: -25 }
+                ]
+            }
+        ];
+
+        // Constructor creates a new map - only center and zoom are required.
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: {lat: 1.363983, lng: 103.8517913},
+            zoom: 13,
+            styles: styles,
+            mapTypeControl: false
+        });
+
+        // These are the real estate listings that will be shown to the user.
+        // Normally we'd have these in a database instead.
+        var locations = [
+            {
+                title: 'Woodlands',
+                location: {lat: 1.4369416, lng: 103.7863953},
+                address: 'Q30, Woodlands Ave 2, Singapore'
+            },
+            {
+                title: 'Bartley',
+                location: {lat: 1.3422592, lng: 103.8802886},
+                address: '212 Upper Paya Lebar Road, 534881, Upper Paya Lebar Road'
+            },
+            {
+                title: 'Esplanade',
+                location: {lat: 1.2939413, lng: 103.8553744},
+                address: '90 Bras Basah Road'
+            },
+            {
+                title: 'Nicoll Highway MRT Station',
+                location: {lat: 1.3002399, lng: 103.8635784},
+                address: '20 Republic Ave'
+            },
+            {
+                title: 'Kent Ridge MRT Station',
+                location: {lat: 1.2924896, lng: 103.7848814},
+                address: '301 South Buona Vista Road'
+            }
+
+        ];
+
+        var largeInfowindow = new google.maps.InfoWindow();
+
+        // Style the markers a bit. This will be our listing marker icon.
+        var defaultIcon = makeMarkerIcon('0091ff');
+
+        // Create a "highlighted location" marker color for when the user
+        // mouses over the marker.
+        var highlightedIcon = makeMarkerIcon('FFFF24');
+
+        // The following group uses the location array to create an array of markers on initialize.
+        for (var i = 0; i < locations.length; i++) {
+            // Get the position from the location array.
+            var position = locations[i].location;
+            var title = locations[i].title;
+            var address = locations[i].address;
+
+            // Create a marker per location, and put into markers array.
+            var marker = new google.maps.Marker({
+                position: position,
+                title: title,
+                animation: google.maps.Animation.DROP,
+                icon: defaultIcon,
+                id: i
+            });
+            // Push the marker to our array of markers.
+            markers.push(marker);
+            // Create an onclick event to open the large infowindow at each marker.
+            marker.addListener('click', function() {
+                populateInfoWindow(this, largeInfowindow, address);
+            });
+            // Two event listeners - one for mouseover, one for mouseout,
+            // to change the colors back and forth.
+            marker.addListener('mouseover', function() {
+                this.setIcon(highlightedIcon);
+            });
+            marker.addListener('mouseout', function() {
+                this.setIcon(defaultIcon);
+            });
+        }
+
+        var bounds = new google.maps.LatLngBounds();
+        // Extend the boundaries of the map for each marker and display the marker
+        for (var i = 0; i < markers.length; i++) {
+            markers[i].setMap(map);
+            bounds.extend(markers[i].position);
+        }
+        map.fitBounds(bounds);
+    }
+
+    function populateInfoWindow(marker, infowindow, address) {
+        // Check to make sure the infowindow is not already opened on this marker.
+        if (infowindow.marker != marker) {
+            // Clear the infowindow content to give the streetview time to load.
+            infowindow.setContent(marker.title + "<br>" + address);
+            infowindow.marker = marker;
+            // Make sure the marker property is cleared if the infowindow is closed.
+            infowindow.addListener('closeclick', function() {
+                infowindow.marker = null;
+            });
+
+            // Open the infowindow on the correct marker.
+            infowindow.open(map, marker);
+        }
+    }
+
+    function makeMarkerIcon(markerColor) {
+        var markerImage = new google.maps.MarkerImage(
+            'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
+            '|40|_|%E2%80%A2',
+            new google.maps.Size(21, 34),
+            new google.maps.Point(0, 0),
+            new google.maps.Point(10, 34),
+            new google.maps.Size(21,34));
+        return markerImage;
+    }
+
+    </script>
+
     <script async defer
         src=
         "https://maps.googleapis.com/maps/api/js?libraries=places,geometry,drawing&key=AIzaSyCSAT41RUuOOAuIAqZKlAYBf2zKzDEtrJs&v&v=3&callback=initMap">
