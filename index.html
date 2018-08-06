@@ -124,7 +124,8 @@
         var request = {
             location: bishanAMK,
             radius: '5000',
-            type: ['library']
+            type: ['library'],
+            rankby: 'distance'
         };
 
         placeService = new google.maps.places.PlacesService(map);
@@ -132,12 +133,23 @@
 
         function callback(results, status) {
             if (status == google.maps.places.PlacesServiceStatus.OK) {
+
+                if (results.length > 0) {
+                    myModel.locationList([]);
+                    if (myModel.markerList().length > 0) {
+                        for (var i = 0; i < myModel.markerList().length; i++) {
+                            myModel.markerList()[i].setMap(null);
+                        }
+                    }
+                    myModel.markerList([]);
+                }                
+
                 for (var i = 0; i < results.length; i++) {
                     var place = results[i];
                     myModel.locationList.push(new Location({title: place.name, address: place.vicinity}));
                     var marker = createMarker(results[i], i);
                     myModel.markerList.push(marker);
-                    console.log(marker);
+                    console.log(myModel.markerList().length);
                 }
                 console.log("inside callback: " + myModel.locationList().length);
                 console.log("inside callback: " + myModel.markerList().length);
@@ -182,7 +194,23 @@
             marker.setMap(map);
             return marker;
         }
-        //ko.applyBindings(myModel);
+
+        document.getElementById('btnFilter').addEventListener('click', filterListings);
+
+        function filterListings() {
+            var txtName = document.getElementById('txtFilter').value.toLowerCase();
+            console.log(txtName);
+
+            request = {
+                location: bishanAMK,
+                radius: '5000',
+                type: ['library'],
+                rankby: 'distance',
+                name: txtName
+            };
+
+            placeService.nearbySearch(request, callback);
+        }
     }
 
     function populateInfoWindow(marker, infowindow, address) {
@@ -212,7 +240,6 @@
             new google.maps.Size(21,34));
         return markerImage;
     }
-
 
 /* knockout portion
     var Location = function(data) {
