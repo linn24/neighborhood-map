@@ -18,10 +18,6 @@
                 <ul data-bind="foreach: locationList">
                     <li data-bind="text: title, click: showInfo($parent)"></li>
                 </ul>
-
-                <!-- <div data-bind="with: currentLocation">
-                    <h2 data-bind="text: title"></h2>
-                </div> -->
             </div>
             <hr>
         </div>
@@ -32,15 +28,6 @@
 
     <script>
     var map;
-
-    //var locations = [];
-
-    // This global polygon variable is to ensure only ONE polygon is rendered.
-    var polygon = null;
-
-    // Create placemarkers array to use in multiple functions to have control
-    // over the number of places that show.
-    var placeMarkers = [];
 
     function initMap() {
         // Create a styles array to use with the map.
@@ -111,6 +98,7 @@
             }
         ];
 
+        // Create center location of the map.
         var bishanAMK = new google.maps.LatLng(1.3380368, 103.8128534);
 
         // Constructor creates a new map - only center and zoom are required.
@@ -121,6 +109,7 @@
             mapTypeControl: false
         });
 
+        // Create search request with parameters.
         var request = {
             location: bishanAMK,
             radius: '5000',
@@ -134,6 +123,7 @@
         function callback(results, status) {
             if (status == google.maps.places.PlacesServiceStatus.OK) {
 
+                // If there is any result returned, clear existing location and marker lists.
                 if (results.length > 0) {
                     myModel.locationList([]);
                     if (myModel.markerList().length > 0) {
@@ -142,20 +132,24 @@
                         }
                     }
                     myModel.markerList([]);
-                }                
+                }
 
                 for (var i = 0; i < results.length; i++) {
                     var place = results[i];
+
+                    // Add each location into location list.
                     myModel.locationList.push(new Location({title: place.name, address: place.vicinity}));
+
+                    // Create new marker for each location.
                     var marker = createMarker(results[i], i);
+
+                    // Add marker into marker list
                     myModel.markerList.push(marker);
-                    console.log(myModel.markerList().length);
                 }
-                console.log("inside callback: " + myModel.locationList().length);
-                console.log("inside callback: " + myModel.markerList().length);
             }
         }
 
+        // Create an InfoWindow so that map will have only 1 window at any time
         var largeInfowindow = new google.maps.InfoWindow();
         myModel.infoWindow(largeInfowindow);
 
@@ -175,9 +169,6 @@
                 icon: defaultIcon,
                 id: index
             });
-
-            // Push the marker to our array of markers.
-            //markers.push(marker);
             // Create an onclick event to open the large infowindow at each marker.
             marker.addListener('click', function() {
                 populateInfoWindow(this, largeInfowindow, place.vicinity);
@@ -194,13 +185,13 @@
             marker.setMap(map);
             return marker;
         }
-
+        // Add event listener for Filter button.
         document.getElementById('btnFilter').addEventListener('click', filterListings);
 
         function filterListings() {
             var txtName = document.getElementById('txtFilter').value.toLowerCase();
-            console.log(txtName);
-
+            
+            // Add additional parameter "name" to filter the results.
             request = {
                 location: bishanAMK,
                 radius: '5000',
@@ -240,36 +231,6 @@
             new google.maps.Size(21,34));
         return markerImage;
     }
-
-/* knockout portion
-    var Location = function(data) {
-        this.title = ko.observable(data.title);
-        //this.location = ko.observable(data.location);
-        //this.address = ko.observable(data.address);
-        this.showInfo = function(parent) {
-            parent.currentLocation(this);
-        };
-
-    }
-
-
-    var ViewModel = function() {
-        var self = this;
-
-        this.locationList = ko.observableArray([]);
-
-        console.log('inside viewmodel');
-        console.log(locations.length);
-
-        locations.forEach(function(locationItem) {
-            self.locationList.push(new Location(locationItem));
-        });
-
-        this.currentLocation = ko.observable(this.locationList()[0]);
-    }
-
-    ko.applyBindings(new ViewModel());
- */
     </script>
 
     <script src="js/app.js"></script>
