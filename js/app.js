@@ -29,9 +29,9 @@ var locations = [
 ];
 */
 var Location = function(data) {
-    this.title = ko.observable(data);
+    this.title = ko.observable(data.title);
     //this.location = ko.observable(data.location);
-    //this.address = ko.observable(data.address);
+    this.address = ko.observable(data.address);
 
 /*
     this.title = ko.computed(function() {
@@ -57,6 +57,11 @@ var Location = function(data) {
 */
     this.showInfo = function(parent) {
         parent.currentLocation(this);
+        parent.currentMarker(parent.markerList()[parent.locationList().indexOf(this)]);
+        //parent.currentMarker().trigger("click");
+        console.log('current marker: ' + parent.currentMarker());
+        console.log('Index: ' + parent.locationList().indexOf(this));
+        populateInfoWindow(parent.currentMarker(), parent.infoWindow(), this.address());
     };
 
 }
@@ -65,13 +70,18 @@ var Location = function(data) {
 var ViewModel = function() {
     var self = this;
 
+    this.infoWindow = ko.observable();
     this.locationList = ko.observableArray([]);
-    console.log("inside ViewModel: " + this.locationList().length);
+    this.markerList = ko.observableArray([]);
+
+    console.log("locationList (inside ViewModel): " + this.locationList().length);
+    console.log("markerList (inside ViewModel): " + this.markerList().length);
     // locations.forEach(function(locationItem) {
     //     self.locationList.push(new Location(locationItem));
     // });
 
     this.currentLocation = ko.observable(this.locationList()[0]);
+    this.currentMarker = ko.observable(this.markerList()[0]);
 
 /*
     this.incrementCounter = function() {
