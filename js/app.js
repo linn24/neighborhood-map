@@ -1,30 +1,39 @@
-var Location = function(data) {
-    this.title = ko.observable(data.title);
-    this.address = ko.observable(data.address);
-
-    this.showInfo = function(parent) {
-        // Set current location and marker.
-        parent.currentLocation(this);
-        parent.currentMarker(parent.markerList()[parent.locationList().indexOf(this)]);
-
-        // Display InfoWindow for current location.
-        populateInfoWindow(parent.currentMarker(), parent.infoWindow(), this.address());
-    };
-}
-
+var map;
+var request;
+var largeInfowindow;
 
 var ViewModel = function() {
     var self = this;
-
-    this.infoWindow = ko.observable();
-
-    this.locationList = ko.observableArray([]);
     this.markerList = ko.observableArray([]);
+    this.searchText = ko.observable('');
 
-    this.currentLocation = ko.observable(this.locationList()[0]);
-    this.currentMarker = ko.observable(this.markerList()[0]);
+    this.showInfo = function(self) {
+        google.maps.event.trigger(self, 'click');
+        self.setAnimation(google.maps.Animation.BOUNCE);
+        setTimeout(function() {
+            self.setAnimation(null); }, 1400);
+    }
+
+    this.filteredMarkerList = ko.computed(function() {
+        if (self.searchText() == '') {
+            self.markerList().forEach(function(item) {
+                item.setVisible(true);
+            });
+            return self.markerList();
+        }
+        else {
+            var filtered = ko.utils.arrayFilter(self.markerList(), function(item) {
+                var isMatched = (item.title.toLowerCase().indexOf(self.searchText().toLowerCase()) > -1);
+                item.setVisible(isMatched);
+                return isMatched;
+            })
+
+            return filtered;
+        }
+    });
 }
 
 var myModel = new ViewModel();
 
-ko.applyBindings(myModel);
+myModel.markerList([]);
+myModel.searchText('');

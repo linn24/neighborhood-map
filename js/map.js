@@ -1,4 +1,10 @@
-var map;
+var defaultIcon;
+var highlightedIcon;
+
+function googleError() {
+    console.log('error occurred');
+    alert('An error occurred while retrieving the information from Google Maps API.');
+}
 
 function initMap() {
     // Create a styles array to use with the map.
@@ -72,6 +78,9 @@ function initMap() {
     // Create center location of the map.
     var bishanAMK = new google.maps.LatLng(1.3380368, 103.8128534);
 
+    // Create an InfoWindow so that map will have only 1 window at any time
+    largeInfowindow = new google.maps.InfoWindow();
+
     // Constructor creates a new map - only center and zoom are required.
     map = new google.maps.Map(document.getElementById('map'), {
         center: bishanAMK,
@@ -81,8 +90,8 @@ function initMap() {
     });
 
     // Create search request with parameters.
-    var request = {
-        location: bishanAMK,
+    request = {
+        //location: bishanAMK,
         radius: '5000',
         type: ['library'],
         rankby: 'distance'
@@ -91,95 +100,51 @@ function initMap() {
     placeService = new google.maps.places.PlacesService(map);
     placeService.nearbySearch(request, callback);
 
-    function callback(results, status) {
-        if (status == google.maps.places.PlacesServiceStatus.OK) {
-
-            // If there is any result returned, clear existing location and marker lists.
-            if (results.length > 0) {
-                myModel.locationList([]);
-                if (myModel.markerList().length > 0) {
-                    for (var i = 0; i < myModel.markerList().length; i++) {
-                        myModel.markerList()[i].setMap(null);
-                    }
-                }
-                myModel.markerList([]);
-            }
-
-            for (var i = 0; i < results.length; i++) {
-                var place = results[i];
-
-                // Add each location into location list.
-                myModel.locationList.push(new Location({title: place.name, address: place.vicinity}));
-
-                // Create new marker for each location.
-                var marker = createMarker(results[i], i);
-
-                // Add marker into marker list
-                myModel.markerList.push(marker);
-            }
-        }
-    }
-
-    // Create an InfoWindow so that map will have only 1 window at any time
-    var largeInfowindow = new google.maps.InfoWindow();
-    myModel.infoWindow(largeInfowindow);
-
     // Style the markers a bit. This will be our listing marker icon.
-    var defaultIcon = makeMarkerIcon('0091ff');
+    defaultIcon = makeMarkerIcon('0091ff');
 
     // Create a "highlighted location" marker color for when the user
     // mouses over the marker.
-    var highlightedIcon = makeMarkerIcon('FFFF24');
+    highlightedIcon = makeMarkerIcon('FFFF24');
+}
 
-    function createMarker(place, index) {
-        var placeLoc = place.geometry.location;
-        var marker = new google.maps.Marker({
-            position: placeLoc,
-            title: place.name,
-            animation: google.maps.Animation.DROP,
-            icon: defaultIcon,
-            id: index
-        });
-        // Create an onclick event to open the large infowindow at each marker.
-        marker.addListener('click', function() {
-            populateInfoWindow(this, largeInfowindow, place.vicinity);
-        });
-        // Two event listeners - one for mouseover, one for mouseout,
-        // to change the colors back and forth.
-        marker.addListener('mouseover', function() {
-            this.setIcon(highlightedIcon);
-        });
-        marker.addListener('mouseout', function() {
-            this.setIcon(defaultIcon);
-        });
+function callback(results, status) {
+    if (status == google.maps.places.PlacesServiceStatus.OK) {
+        for (var i = 0; i < results.length; i++) {
+            var place = results[i];
 
-        marker.setMap(map);
-        return marker;
-    }
-    // Add event listener for Filter button.
-    document.getElementById('btnFilter').addEventListener('click', filterListings);
-
-    function filterListings() {
-        var txtName = document.getElementById('txtFilter').value.toLowerCase();
-
-        // Add additional parameter "name" to filter the results.
-        request = {
-            location: bishanAMK,
-            radius: '5000',
-            type: ['library'],
-            rankby: 'distance',
-            name: txtName
-        };
-
-        try {
-            placeService.nearbySearch(request, callback);
+            // Create new marker for each location.
+            createMarker(place);
         }
-        catch (error) {
-            console.log(error.message);
-            googleError();
-        }
-
     }
+}
+
+function createMarker(place) {
+    var placeLoc = place.geometry.location;
+    var marker = new google.maps.Marker({
+        map: map,
+        position: placeLoc,
+        title: place.name,
+        animation: google.maps.Animation.DROP,
+        icon: defaultIcon
+    });
+    // Create an onclick event to open the large infowindow at each marker.
+    marker.addListener('click', function() {
+        populateInfoWindow(this, largeInfowindow, place.vicinity);
+        this.setAnimation(google.maps.Animation.BOUNCE);
+        setTimeout(function() {
+            marker.setAnimation(null); }, 1400);
+    });
+    // Two event listeners - one for mouseover, one for mouseout,
+    // to change the colors back and forth.
+    marker.addListener('mouseover', function() {
+        this.setIcon(highlightedIcon);
+    });
+    marker.addListener('mouseout', function() {
+        this.setIcon(defaultIcon);
+    });
+    // Add marker into marker list
+    myModel.markerList.push(marker);
 }
 
 function populateInfoWindow(marker, infowindow, address) {
@@ -210,7 +175,4 @@ function makeMarkerIcon(markerColor) {
     return markerImage;
 }
 
-function googleError() {
-    console.log('error occurred');
-    alert('An error occurred while retrieving the information from Google Maps API.');
-}
+ko.applyBindings(myModel);
