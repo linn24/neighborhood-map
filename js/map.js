@@ -76,14 +76,15 @@ function initMap() {
     ];
 
     // Create center location of the map.
-    var bishanAMK = new google.maps.LatLng(1.3380368, 103.8128534);
+    var washingtonSquare = new google.maps.LatLng(40.7434128, -73.9880056);
+    //(1.3380368, 103.8128534);
 
     // Create an InfoWindow so that map will have only 1 window at any time
     largeInfowindow = new google.maps.InfoWindow();
 
     // Constructor creates a new map - only center and zoom are required.
     map = new google.maps.Map(document.getElementById('map'), {
-        center: bishanAMK,
+        center: washingtonSquare,
         zoom: 13,
         styles: styles,
         mapTypeControl: false
@@ -91,9 +92,9 @@ function initMap() {
 
     // Create search request with parameters.
     request = {
-        //location: bishanAMK,
+        location: washingtonSquare,
         radius: '5000',
-        type: ['library'],
+        type: ['museum'],
         rankby: 'distance'
     };
 
@@ -110,7 +111,11 @@ function initMap() {
 
 function callback(results, status) {
     if (status == google.maps.places.PlacesServiceStatus.OK) {
-        for (var i = 0; i < results.length; i++) {
+        var maxLen = results.length;
+        if (maxLen > 10) {
+            maxLen = 10;
+        }
+        for (var i = 0; i < maxLen; i++) {
             var place = results[i];
 
             // Create new marker for each location.
@@ -131,6 +136,7 @@ function createMarker(place) {
     // Create an onclick event to open the large infowindow at each marker.
     marker.addListener('click', function() {
         populateInfoWindow(this, largeInfowindow, place.vicinity);
+        getNYTimesData(this);
         this.setAnimation(google.maps.Animation.BOUNCE);
         setTimeout(function() {
             marker.setAnimation(null); }, 1400);
@@ -152,7 +158,7 @@ function populateInfoWindow(marker, infowindow, address) {
     // Check to make sure the infowindow is not already opened on this marker.
     if (infowindow.marker != marker) {
         // Clear the infowindow content to give the streetview time to load.
-        infowindow.setContent(marker.title + "<br>" + address);
+        infowindow.setContent(marker.title + "<br>" + address + "<ul id='nytimes-articles' class='article-list'></ul>");
         infowindow.marker = marker;
         // Make sure the marker property is cleared if the infowindow is closed.
         infowindow.addListener('closeclick', function() {
@@ -162,6 +168,33 @@ function populateInfoWindow(marker, infowindow, address) {
         // Open the infowindow on the correct marker.
         infowindow.open(map, marker);
     }
+}
+
+function getNYTimesData(marker) {
+    var nytimesUrl = 'http://api.nytimes.com/svc/search/v2/articlesearch.json?q=' + marker.title + '&sort=newest&api-key=072356f496744ac797a92ecfb9cf1035';
+    //var $nytHeaderElem = $('#nytimes-header');
+    var $nytElem = $('#nytimes-articles');
+    $.getJSON(nytimesUrl, function(data){
+
+        //$nytHeaderElem.text('New York Times Articles About ' + marker.title);
+
+        articles = data.response.docs;
+        var maxLen = articles.length;
+        if (maxLen > 3) {
+            maxLen = 3;
+        }
+
+        for (var i = 0; i < maxLen; i++) {
+            var article = articles[i];
+            $nytElem.append('<li class="article">'+
+                '<a href="'+article.web_url+'">'+article.headline.main+'</a>'+
+                '<p>' + article.snippet + '</p>'+
+            '</li>');
+        };
+
+    }).error(function(e){
+        $nytElem.text('New York Times Articles Could Not Be Loaded');
+    });
 }
 
 function makeMarkerIcon(markerColor) {
