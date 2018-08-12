@@ -37,6 +37,16 @@ hr {
     right: 0px;
 }
 
+#map.toggled {
+    left: 0px;
+    position: absolute;
+}
+
+.slide-toggle svg {
+  width: 32px;
+  fill: #E0E0E0;
+}
+
 .options-box {
     background: #fff;
     color: #13609B;
@@ -47,6 +57,8 @@ hr {
     padding: 10px 10px 30px 10px;
     text-align: left;
     width: 340px;
+    float:left;
+    overflow: hidden;
 }
 
 li:hover {
