@@ -140,6 +140,8 @@ function createMarker(place) {
         this.setAnimation(google.maps.Animation.BOUNCE);
         setTimeout(function() {
             marker.setAnimation(null); }, 1400);
+        map.setCenter(placeLoc);
+        map.panBy(0, -150);
     });
     // Two event listeners - one for mouseover, one for mouseout,
     // to change the colors back and forth.
@@ -164,6 +166,9 @@ function populateInfoWindow(marker, infowindow, address) {
         infowindow.addListener('closeclick', function() {
             infowindow.marker = null;
         });
+
+        // Set maximum width
+        infowindow.setOptions({maxWidth:250});
 
         // Open the infowindow on the correct marker.
         infowindow.open(map, marker);
