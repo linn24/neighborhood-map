@@ -29,7 +29,7 @@ hr {
     border: none;
 }
 
-#map {
+.mapCanvas {
     bottom:0px;
     height: 100%;
     left: 362px;
@@ -37,7 +37,7 @@ hr {
     right: 0px;
 }
 
-#map.toggled {
+.mapCanvas.toggled {
     left: 0px;
     position: absolute;
 }

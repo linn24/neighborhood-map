@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="css/style.css" type="text/css">
 </head>
 <body>
-    <a class="slide-toggle">
+    <a class="slide-toggle" data-bind="click: slideToggle">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M2 6h20v3H2zm0 5h20v3H2zm0 5h20v3H2z"/>
         </svg>
@@ -27,7 +27,7 @@
             </div>
             <hr>
         </div>
-        <div id="map"></div>
+        <div id="map" class='mapCanvas'></div>
     </div>
 
     <script src="js/lib/knockout-3.2.0.js"></script>
@@ -35,16 +35,7 @@
 
     <script src="js/app.js"></script>
     <script src="js/map.js"></script>
-    <script>
-    $(document).ready(function(){
-        $(".slide-toggle").click(function(){
-            $(".options-box").animate({
-                width: "toggle"
-            });
-            $("#map").toggleClass("toggled");
-        });
-    });
-    </script>
+    
 
     <script async defer
         src=

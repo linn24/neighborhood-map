@@ -136,7 +136,7 @@ function createMarker(place) {
     // Create an onclick event to open the large infowindow at each marker.
     marker.addListener('click', function() {
         populateInfoWindow(this, largeInfowindow, place.vicinity);
-        getNYTimesData(this);
+        myModel.getNYTimesData(this, largeInfowindow, place.vicinity);
         this.setAnimation(google.maps.Animation.BOUNCE);
         setTimeout(function() {
             marker.setAnimation(null); }, 1400);
@@ -159,8 +159,10 @@ function populateInfoWindow(marker, infowindow, address) {
 
     // Check to make sure the infowindow is not already opened on this marker.
     if (infowindow.marker != marker) {
-        // Clear the infowindow content to give the streetview time to load.
+
+        // Clear the infowindow content to give the NY times to load.
         infowindow.setContent(marker.title + "<br>" + address + "<ul id='nytimes-articles' class='article-list'></ul>");
+
         infowindow.marker = marker;
         // Make sure the marker property is cleared if the infowindow is closed.
         infowindow.addListener('closeclick', function() {
@@ -173,33 +175,6 @@ function populateInfoWindow(marker, infowindow, address) {
         // Open the infowindow on the correct marker.
         infowindow.open(map, marker);
     }
-}
-
-function getNYTimesData(marker) {
-    var nytimesUrl = 'http://api.nytimes.com/svc/search/v2/articlesearch.json?q=' + marker.title + '&sort=newest&api-key=072356f496744ac797a92ecfb9cf1035';
-    //var $nytHeaderElem = $('#nytimes-header');
-    var $nytElem = $('#nytimes-articles');
-    $.getJSON(nytimesUrl, function(data){
-
-        //$nytHeaderElem.text('New York Times Articles About ' + marker.title);
-
-        articles = data.response.docs;
-        var maxLen = articles.length;
-        if (maxLen > 3) {
-            maxLen = 3;
-        }
-
-        for (var i = 0; i < maxLen; i++) {
-            var article = articles[i];
-            $nytElem.append('<li class="article">'+
-                '<a href="'+article.web_url+'">'+article.headline.main+'</a>'+
-                '<p>' + article.snippet + '</p>'+
-            '</li>');
-        };
-
-    }).error(function(e){
-        $nytElem.text('New York Times Articles Could Not Be Loaded');
-    });
 }
 
 function makeMarkerIcon(markerColor) {
