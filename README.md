@@ -12,3 +12,6 @@ Please install a web browser (e.g., Internet Explorer, Google Chrome or Mozilla 
 1) Download the source codes.
 2) Open the directory the source code is downloaded to.
 3) Open **index.html** using any web browser.
+
+# How to access live neighborhood map application
+Please visit [https://linn24.github.io/neighborhood-map/](https://linn24.github.io/neighborhood-map/).
